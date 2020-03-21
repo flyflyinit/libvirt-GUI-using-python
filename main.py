@@ -5,12 +5,10 @@ from PyQt5.QtCore import Qt, QTimer
 import qtmodern.styles
 import qtmodern.windows
 import subprocess
-
 from qtpy import QtCore
-
 from getInfo import GetInformationMain
+from getInfo import PreWindow
 import libvirt
-from PyQt5.QtGui import QPixmap
 
 rows=[]
 ################ disk usage
@@ -35,24 +33,11 @@ memrss = []
 memswapin = []
 memswapout = []
 memcurrenttime = 0
-
-
-class Window2(QMdiSubWindow):
-    def __init__(self):
-        super().__init__()
-        self.setGeometry(0,0,200,200)
-        self.setWindowTitle("saving..")
-        self.UI()
-        self.show()
-
-    def UI(self):
-        image = QLabel(self)
-        image.setPixmap(QPixmap('icons/svg/loading.gif'))
-        image.setGeometry(0, 0, 500, 100)
-        image.move(10, 10)
-
-        image.close()
-        image.show()
+################### io usage
+iotime = []
+ioread = []
+iowrite = []
+iocurrenttime = 0
 
 
 class Window(QMainWindow):
@@ -64,16 +49,16 @@ class Window(QMainWindow):
         self.show()
 
     def UI(self):
+        self.layouts()
         self.menuBarr()
         self.toolBarr()
         self.toolBarr2()
-        self.layouts()
 
         self.ins = GetInformationMain()
         self.conn = self.ins.createConnection()
         self.updateListVM()
         self.startUpdatingTimer()
-        self.ins.systemInformation(self.conn)
+        #self.ins.systemInformation(self.conn)
 
 
 
@@ -161,10 +146,10 @@ class Window(QMainWindow):
         edit = menuB.addMenu("Edit")
         help = menuB.addMenu("Help")
 
-        new = QAction("new", self)
-        new.setShortcut("Ctrl+N")
-        #new.triggered.connect(self.newFile)
-        file.addAction(new)
+        pre = QAction("Prefrences", self)
+        pre.setShortcut("Ctrl+P")
+        pre.triggered.connect(self.prefrences)
+        file.addAction(pre)
 
         rename = QAction("rename", self)
         file.addAction(rename)
@@ -176,8 +161,15 @@ class Window(QMainWindow):
         exitt.setIcon(QIcon("icons/svg/cancel.svg"))
         exitt.triggered.connect(self.exit)
 
-    #def listVM(self):
-        #self.updateListVM()
+
+
+    def prefrences(self):
+        pw = PreWindow()
+        pww = qtmodern.windows.ModernWindow(pw)
+        pww.show()
+
+
+
 
 ################################################################## VM actions ##################################
     def startVM(self):
@@ -340,32 +332,39 @@ class Window(QMainWindow):
 
 
     def enableAutoStart(self):
-        text, ok = QInputDialog.getText(self, 'enter domain ID', 'Enter Domain ID :')
-        if ok:
-            try:
-                dom = self.conn.lookupByID(int(text))
-                if dom == None:
-                    QMessageBox.warning(self,'warning','Failed to find the domain ID '+str(text))
-                else:
-                    dom.setAutostart(1)
-                    QMessageBox.information(self, 'success',f'enabled autostart for domain ID {str(text)} succesfully')
-            except Exception as e:
-                QMessageBox.critical(self, "ERROR",f"error occured during enabling autostart for {str(text)} domain ID \n{e}")
+        a = self.table.currentRow()
+        if a==-1:
+            QMessageBox.warning(self,"warning","please select a VM")
         else:
-            pass
+            row = rows[a]
+            domain = row[1]
+            try:
+                self.dom = self.conn.lookupByName(domain)
+                if self.dom.autostart() == 1:
+                    QMessageBox.information(self,'information',f'autostart already enabled in {domain} domain')
+                else:
+                    self.dom.setAutostart(1)
+                    QMessageBox.information(self, 'success', f'autostart enabled succesfully in domain {domain}')
+            except Exception as e :
+                QMessageBox.critical(self,"ERROR",f"error occured during enabling autostart to {domain} domain\n{e}")
+
 
     def disableAutoStart(self):
-        text, ok = QInputDialog.getText(self, 'enter domain ID', 'Enter Domain ID :')
-        if ok:
+        a = self.table.currentRow()
+        if a==-1:
+            QMessageBox.warning(self,"warning","please select a VM")
+        else:
+            row = rows[a]
+            domain = row[1]
             try:
-                dom = self.conn.lookupByID(int(text))
-                if dom == None:
-                    QMessageBox.warning(self,'warning','Failed to find the domain ID '+str(text))
+                self.dom = self.conn.lookupByName(domain)
+                if self.dom.autostart() == 0:
+                    QMessageBox.information(self,'information',f'autostart already disabled in {domain} domain')
                 else:
-                    dom.setAutostart(0)
-                    QMessageBox.information(self,'success',f'disabled autostart for domain ID {str(text)} succesfully')
+                    self.dom.setAutostart(0)
+                    QMessageBox.information(self, 'success', f'autostart disabled succesfully in domain {domain}')
             except Exception as e :
-                QMessageBox.critical(self,"ERROR",f"error occured during disabling autostart for {str(text)} domain ID \n{e}")
+                QMessageBox.critical(self,"ERROR",f"error occured during disabling autostart to {domain} domain\n{e}")
 
 
     ###########################################################################################################################
@@ -408,7 +407,7 @@ class Window(QMainWindow):
     def startUpdatingTimer(self):
         self.timerr = QTimer(self)
         self.timerr.start()
-        self.timerr.setInterval(20000)
+        self.timerr.setInterval(10000)
         self.timerr.timeout.connect(self.updateListVM)
 
     def updateListVM(self):
@@ -617,6 +616,7 @@ class Window(QMainWindow):
         global memani
 
         memstats = self.dom.memoryStats()
+        print(memstats)
         mem.append(memstats['actual'])
         memswapin.append(memstats['swap_in'])
         memswapout.append(memstats['swap_out'])
@@ -710,7 +710,6 @@ class Window(QMainWindow):
         global ioani
 
         from xml.etree import ElementTree
-        self.dom = self.conn.lookupByID(2)
         tree = ElementTree.fromstring(self.dom.XMLDesc())
         iface = tree.find('devices/interface/target').get('dev')
         stats = self.dom.interfaceStats(iface)
@@ -788,6 +787,7 @@ def main():
     App = QApplication(sys.argv)
     w = Window()
     qtmodern.styles.dark(App)
+    #qtmodern.styles.light(App)
     mw = qtmodern.windows.ModernWindow(w)
     mw.show()
     sys.exit(App.exec_())
