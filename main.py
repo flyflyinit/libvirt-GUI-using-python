@@ -5,10 +5,15 @@ from PyQt5.QtCore import Qt, QTimer
 import qtmodern.styles
 import qtmodern.windows
 import subprocess
-from qtpy import QtCore
+from qtpy import QtCore, QtGui
 from getInfo import GetInformationMain
 from getInfo import PreWindow
 import libvirt
+
+
+uri='qemu:///system'
+host='localhost'
+
 
 rows=[]
 ################ disk usage
@@ -49,13 +54,16 @@ class Window(QMainWindow):
         self.show()
 
     def UI(self):
+        global host
+        global uri
+
         self.layouts()
         self.menuBarr()
         self.toolBarr()
         self.toolBarr2()
 
         self.ins = GetInformationMain()
-        self.conn = self.ins.createConnection()
+        self.conn = self.ins.createConnection(host,uri)
         self.updateListVM()
         self.startUpdatingTimer()
         #self.ins.systemInformation(self.conn)
@@ -66,55 +74,47 @@ class Window(QMainWindow):
         tb1 = self.addToolBar("Actions")
         tb1.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
-        starttb1 = QAction(QIcon("icons/svg/start.png"), "start", self)
+        starttb1 = QAction(QIcon("icons/start.png"), "start", self)
         tb1.addAction(starttb1)
         tb1.addSeparator()
         starttb1.triggered.connect(self.startVM)
-        suspendtb1 = QAction(QIcon("icons/svg/suspend.png"), "suspend", self)
+        suspendtb1 = QAction(QIcon("icons/suspend.png"), "suspend", self)
         tb1.addAction(suspendtb1)
         tb1.addSeparator()
         suspendtb1.triggered.connect(self.suspendVM)
-        resumetb1 = QAction(QIcon("icons/svg/resume.png"), "resume", self)
+        resumetb1 = QAction(QIcon("icons/resume.png"), "resume", self)
         tb1.addAction(resumetb1)
         tb1.addSeparator()
         tb1.addSeparator()
         tb1.addSeparator()
         resumetb1.triggered.connect(self.resumeVM)
-        shutdowntb1 = QAction(QIcon("icons/svg/shutdown.png"), "shutdown", self)
+        shutdowntb1 = QAction(QIcon("icons/shutdown.png"), "shutdown", self)
         tb1.addAction(shutdowntb1)
         tb1.addSeparator()
         shutdowntb1.triggered.connect(self.shutdownVM)
-        destroytb1 = QAction(QIcon("icons/svg/destroy.png"), "destroy", self)
+        destroytb1 = QAction(QIcon("icons/destroy.png"), "destroy", self)
         tb1.addAction(destroytb1)
         tb1.addSeparator()
         destroytb1.triggered.connect(self.destroyVM)
-        reboottb1 = QAction(QIcon("icons/svg/reboot.png"), "reboot", self)
+        reboottb1 = QAction(QIcon("icons/reboot.png"), "reboot", self)
         tb1.addAction(reboottb1)
         tb1.addSeparator()
         tb1.addSeparator()
         tb1.addSeparator()
         reboottb1.triggered.connect(self.rebootVM)
 
-        savetb1 = QAction(QIcon("icons/svg/save.png"), "save", self)
+        savetb1 = QAction(QIcon("icons/save.png"), "save", self)
         tb1.addAction(savetb1)
         savetb1.triggered.connect(self.saveVM)
         tb1.addSeparator()
-        restoretb1 = QAction(QIcon("icons/svg/restore.png"), "restore", self)
+        restoretb1 = QAction(QIcon("icons/restore.png"), "restore", self)
         tb1.addAction(restoretb1)
         restoretb1.triggered.connect(self.restoreVM)
         tb1.addSeparator()
-        resettb1 = QAction(QIcon("icons/svg/reset.png"), "reset", self)
+        resettb1 = QAction(QIcon("icons/reset.png"), "reset", self)
         tb1.addAction(resettb1)
         resettb1.triggered.connect(self.resetVM)
         tb1.addSeparator()
-
-        enableautostarttb1 = QAction("enable autostart", self)
-        tb1.addAction(enableautostarttb1)
-        enableautostarttb1.triggered.connect(self.enableAutoStart)
-        tb1.addSeparator()
-        disableautostarttb1 = QAction("disable autostart", self)
-        tb1.addAction(disableautostarttb1)
-        disableautostarttb1.triggered.connect(self.disableAutoStart)
 
 
     def toolBarr2(self):
@@ -123,19 +123,19 @@ class Window(QMainWindow):
 
         tb2.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
-        disktb2 = QAction(QIcon("icons/svg/disk.png"), "Disk Usage", self)
+        disktb2 = QAction(QIcon("icons/disk.png"), "Disk Usage", self)
         tb2.addAction(disktb2)
         disktb2.triggered.connect(self.DiskU)
 
-        iotb2 = QAction(QIcon("icons/svg/io.png"), "I/O Usage", self)
+        iotb2 = QAction(QIcon("icons/io.png"), "I/O Usage", self)
         tb2.addAction(iotb2)
         iotb2.triggered.connect(self.IOUsage)
 
-        memorytb2 = QAction(QIcon("icons/svg/ram.png"), "Memory Usage", self)
+        memorytb2 = QAction(QIcon("icons/ram.png"), "Memory Usage", self)
         tb2.addAction(memorytb2)
         memorytb2.triggered.connect(self.MemoryUsage)
 
-        cputb2 = QAction(QIcon("icons/svg/cpu.png"), "Cpu Usage", self)
+        cputb2 = QAction(QIcon("icons/cpu.png"), "Cpu Usage", self)
         tb2.addAction(cputb2)
         cputb2.triggered.connect(self.VCPUsage)
 
@@ -158,7 +158,7 @@ class Window(QMainWindow):
 
         exitt = QAction("Exit", self)
         file.addAction(exitt)
-        exitt.setIcon(QIcon("icons/svg/cancel.svg"))
+        exitt.setIcon(QIcon("icons/cancel.svg"))
         exitt.triggered.connect(self.exit)
 
 
@@ -174,6 +174,7 @@ class Window(QMainWindow):
 ################################################################## VM actions ##################################
     def startVM(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -190,6 +191,7 @@ class Window(QMainWindow):
 
     def suspendVM(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -206,6 +208,7 @@ class Window(QMainWindow):
 
     def shutdownVM(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -222,6 +225,7 @@ class Window(QMainWindow):
 
     def destroyVM(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -239,6 +243,7 @@ class Window(QMainWindow):
 
     def saveVM(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -282,6 +287,7 @@ class Window(QMainWindow):
 
     def resumeVM(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -299,6 +305,7 @@ class Window(QMainWindow):
 
     def resetVM(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -316,6 +323,7 @@ class Window(QMainWindow):
 
     def rebootVM(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -333,6 +341,7 @@ class Window(QMainWindow):
 
     def enableAutoStart(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -341,7 +350,7 @@ class Window(QMainWindow):
             try:
                 self.dom = self.conn.lookupByName(domain)
                 if self.dom.autostart() == 1:
-                    QMessageBox.information(self,'information',f'autostart already enabled in {domain} domain')
+                    QMessageBox.warning(self,'warning',f'autostart already enabled in {domain} domain')
                 else:
                     self.dom.setAutostart(1)
                     QMessageBox.information(self, 'success', f'autostart enabled succesfully in domain {domain}')
@@ -351,6 +360,7 @@ class Window(QMainWindow):
 
     def disableAutoStart(self):
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -359,7 +369,7 @@ class Window(QMainWindow):
             try:
                 self.dom = self.conn.lookupByName(domain)
                 if self.dom.autostart() == 0:
-                    QMessageBox.information(self,'information',f'autostart already disabled in {domain} domain')
+                    QMessageBox.warning(self,'warning',f'autostart already disabled in {domain} domain')
                 else:
                     self.dom.setAutostart(0)
                     QMessageBox.information(self, 'success', f'autostart disabled succesfully in domain {domain}')
@@ -377,7 +387,7 @@ class Window(QMainWindow):
 
         self.table=QTableWidget()
         self.table.setRowCount(0)
-        self.table.setColumnCount(10)
+        self.table.setColumnCount(11)
         self.table.setHorizontalHeaderItem(0,QTableWidgetItem("ID"))
         self.table.setHorizontalHeaderItem(1,QTableWidgetItem("NAME"))
         self.table.setHorizontalHeaderItem(2,QTableWidgetItem("UUID"))
@@ -388,20 +398,61 @@ class Window(QMainWindow):
         self.table.setHorizontalHeaderItem(7,QTableWidgetItem("MAX VCPUs"))
         self.table.setHorizontalHeaderItem(8,QTableWidgetItem("VNC"))
         self.table.setHorizontalHeaderItem(9,QTableWidgetItem("SPICE"))
+        self.table.setHorizontalHeaderItem(10,QTableWidgetItem("GUI"))
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        #self.table.resizeColumnsToContents()
+        #self.table.resizeRowsToContents()
+        self.table.setCurrentCell(-1,-1)
 
         self.topLayout.addWidget(self.table)
-
         self.setCentralWidget(self.table)
 
         #self.bottomLayout.addWidget(self.title)
         #self.setCentralWidget(self.title)
-
         self.mainLayout.addLayout(self.topLayout)
         self.mainLayout.addLayout(self.bottomLayout)
-
         self.setLayout(self.mainLayout)
+
+
+
+    def contextMenuEvent(self,event):
+        self.table.menuu = QMenu(self.table)
+        opengui = QAction('Open GUI', self.table)
+        enableAS = QAction('Enable autostart', self.table)
+        disableAS = QAction('Disable autostart', self.table)
+        start = QAction('Start', self.table)
+        suspend = QAction('Suspend', self.table)
+        resume = QAction('Resume', self.table)
+        shutdown = QAction('Shutdown', self.table)
+        destroy = QAction('Destroy', self.table)
+        reboot = QAction('Reboot', self.table)
+        save = QAction('Save', self.table)
+        reset = QAction('Reset', self.table)
+        opengui.triggered.connect(self.connectGUI)
+        self.table.menuu.addAction(opengui)
+        enableAS.triggered.connect(self.enableAutoStart)
+        self.table.menuu.addAction(enableAS)
+        disableAS.triggered.connect(self.disableAutoStart)
+        self.table.menuu.addAction(disableAS)
+        start.triggered.connect(self.startVM)
+        self.table.menuu.addAction(start)
+        suspend.triggered.connect(self.suspendVM)
+        self.table.menuu.addAction(suspend)
+        resume.triggered.connect(self.resumeVM)
+        self.table.menuu.addAction(resume)
+        shutdown.triggered.connect(self.shutdownVM)
+        self.table.menuu.addAction(shutdown)
+        destroy.triggered.connect(self.destroyVM)
+        self.table.menuu.addAction(destroy)
+        reboot.triggered.connect(self.rebootVM)
+        self.table.menuu.addAction(reboot)
+        save.triggered.connect(self.saveVM)
+        self.table.menuu.addAction(save)
+        reset.triggered.connect(self.resetVM)
+        self.table.menuu.addAction(reset)
+
+        self.table.menuu.popup(QtGui.QCursor.pos())
 
 
     def startUpdatingTimer(self):
@@ -411,6 +462,7 @@ class Window(QMainWindow):
         self.timerr.timeout.connect(self.updateListVM)
 
     def updateListVM(self):
+        self.table.setCurrentCell(-1,-1)
         global rows
         rowPosition = 0
         self.table.setRowCount(0)
@@ -430,8 +482,46 @@ class Window(QMainWindow):
             self.table.setItem(self.rowPosition, 8, QTableWidgetItem(str(self.row[8])))
             self.table.setItem(self.rowPosition, 9, QTableWidgetItem(str(self.row[9])))
 
+            self.btn=QPushButton("Open")
+            self.btn.clicked.connect(self.connectGUI)
+            self.table.setCellWidget(self.rowPosition, 10,self.btn)
 
-############################################################################## Disk Usage ###########################
+
+
+
+    def connectGUI(self):
+        global host
+        global uri
+
+        a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
+        if a==-1:
+            QMessageBox.warning(self,"warning","please select a VM")
+        else:
+            try:
+                row = rows[a]
+                domain = row[1]
+                state = row[3]
+                if state != 'SHUT DOWN' and state != 'SHUT OFF':
+                    vnc = str(row[8])
+                    spice = str(row[9])
+                    spiceport = str(spice.split('(')[0])
+                    vncport = str(vnc.split('(')[0])
+                    if spiceport!='-1':
+                        subprocess.run(f'spicy --uri={uri} -h {host} -p {spiceport}',shell=True)
+                    elif vncport!='-1':
+                        c = subprocess.run(f'virsh vncdisplay {domain}',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                        out=str(c.stdout.decode('utf-8'))
+                        # tiger vnc client
+                        subprocess.run(f'vncviewer {out}',shell=True)
+                    else:
+                        QMessageBox.warning(self, 'warning', f'domain {domain}, Failed to get VNC port, and SPICE port. Is this domain using VNC or SPICE ?')
+                else:
+                    QMessageBox.warning(self,'warning',f'domain {domain} is not running')
+            except Exception as e:
+                QMessageBox.critical(self, 'error', f'error occured \n{e}')
+
+    ############################################################################## Disk Usage ###########################
     def animateDisk(self,i):
         from matplotlib.ticker import ScalarFormatter
         global read
@@ -472,6 +562,7 @@ class Window(QMainWindow):
         global ax1
         global ani
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -482,7 +573,7 @@ class Window(QMainWindow):
                 state, reason = self.dom.state()
                 self.domname = self.dom.name()
                 self.imagepath = f'/var/lib/libvirt/images/{self.domname}.qcow2'
-                if state == libvirt.VIR_DOMAIN_RUNNING:
+                if state != libvirt.VIR_DOMAIN_SHUTOFF and state != libvirt.VIR_DOMAIN_SHUTDOWN:
                     import matplotlib.pyplot as plt
                     import matplotlib.animation as animation
                     from matplotlib.ticker import ScalarFormatter
@@ -565,6 +656,7 @@ class Window(QMainWindow):
         global cpuax1
         global cpuani
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -575,7 +667,7 @@ class Window(QMainWindow):
                 state, reason = self.dom.state()
                 self.domname = self.dom.name()
 
-                if state == libvirt.VIR_DOMAIN_RUNNING:
+                if state != libvirt.VIR_DOMAIN_SHUTOFF and state != libvirt.VIR_DOMAIN_SHUTDOWN:
                     import matplotlib.pyplot as cpuplt
                     import matplotlib.animation as animation
                     from matplotlib.ticker import ScalarFormatter
@@ -617,31 +709,51 @@ class Window(QMainWindow):
 
         memstats = self.dom.memoryStats()
         print(memstats)
-        mem.append(memstats['actual'])
-        memswapin.append(memstats['swap_in'])
-        memswapout.append(memstats['swap_out'])
-        memunused.append(memstats['unused'])
-        memava.append(memstats['available'])
-        memrss.append(memstats['rss'])
-        memcurrenttime=memcurrenttime+1
-        memtime.append(str(memcurrenttime))
+        if (len(memstats)==4):
+            mem.append(memstats['actual'])
+            memswapin.append(memstats['swap_in'])
+            memrss.append(memstats['rss'])
+            memcurrenttime = memcurrenttime + 1
+            memtime.append(str(memcurrenttime))
 
-        if len(memtime) == 60:
-            memtime.pop(0)
-            mem.pop(0)
-            memswapin.pop(0)
-            memswapout.pop(0)
-            memunused.pop(0)
-            memava.pop(0)
-            memrss.pop(0)
+            if len(memtime) == 60:
+                memtime.pop(0)
+                mem.pop(0)
+                memswapin.pop(0)
+                memrss.pop(0)
 
-        memax1.clear()
-        memax1.plot(memtime, mem, label='actual', color='black')
-        memax1.plot(memtime, memswapin, label='swap in', color='red')
-        memax1.plot(memtime, memswapout, label='swap out', color='green')
-        memax1.plot(memtime, memunused, label='unused', color='gray')
-        memax1.plot(memtime, memava, label='available', color='blue')
-        memax1.plot(memtime, memrss, label='rss', color='brown')
+            memax1.clear()
+            memax1.plot(memtime, mem, label='actual', color='black')
+            memax1.plot(memtime, memswapin, label='swap in', color='red')
+            memax1.plot(memtime, memrss, label='rss', color='brown')
+
+        else:
+            mem.append(memstats['actual'])
+            memswapin.append(memstats['swap_in'])
+            memswapout.append(memstats['swap_out'])
+            memunused.append(memstats['unused'])
+            memava.append(memstats['available'])
+            memrss.append(memstats['rss'])
+            memcurrenttime=memcurrenttime+1
+            memtime.append(str(memcurrenttime))
+
+            if len(memtime) == 60:
+                memtime.pop(0)
+                mem.pop(0)
+                memswapin.pop(0)
+                memswapout.pop(0)
+                memunused.pop(0)
+                memava.pop(0)
+                memrss.pop(0)
+
+            memax1.clear()
+            memax1.plot(memtime, mem, label='actual', color='black')
+            memax1.plot(memtime, memswapin, label='swap in', color='red')
+            memax1.plot(memtime, memswapout, label='swap out', color='green')
+            memax1.plot(memtime, memunused, label='unused', color='gray')
+            memax1.plot(memtime, memava, label='available', color='blue')
+            memax1.plot(memtime, memrss, label='rss', color='brown')
+
         memplt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
         memplt.xlabel("Seconds")
         memplt.ylabel('Memory')
@@ -662,6 +774,7 @@ class Window(QMainWindow):
         global memax1
         global memani
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -672,7 +785,7 @@ class Window(QMainWindow):
                 state, reason = self.dom.state()
                 self.domname = self.dom.name()
 
-                if state == libvirt.VIR_DOMAIN_RUNNING:
+                if state != libvirt.VIR_DOMAIN_SHUTOFF and state != libvirt.VIR_DOMAIN_SHUTDOWN:
                     import matplotlib.pyplot as memplt
                     import matplotlib.animation as animation
                     from matplotlib.ticker import ScalarFormatter
@@ -744,6 +857,7 @@ class Window(QMainWindow):
         global ioax1
         global ioani
         a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
         if a==-1:
             QMessageBox.warning(self,"warning","please select a VM")
         else:
@@ -754,7 +868,7 @@ class Window(QMainWindow):
                 state, reason = self.dom.state()
                 self.domname = self.dom.name()
 
-                if state == libvirt.VIR_DOMAIN_RUNNING:
+                if state != libvirt.VIR_DOMAIN_SHUTOFF and state != libvirt.VIR_DOMAIN_SHUTDOWN:
                     import matplotlib.pyplot as ioplt
                     import matplotlib.animation as animation
                     from matplotlib.ticker import ScalarFormatter

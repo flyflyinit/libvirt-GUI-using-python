@@ -5,16 +5,17 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
 
 
+
 class GetInformationMain(QMainWindow):
 
     def __init__(self):
         super().__init__()
 
 
-    def createConnection(self):
+    def createConnection(self,host,uri):
         try:
             QMessageBox.information(self, "information","This tool for now supports just QEMU driver for managing KVM guests\nother hypervisors and remote connections will be supported soon!")
-            conn = libvirt.open('qemu:///system')
+            conn = libvirt.open(uri)
             #print(conn.getCapabilities())
             if conn == None:
                 QMessageBox.information(self, "information","Failed to open connection to qemu:///system")
