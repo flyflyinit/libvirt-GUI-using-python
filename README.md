@@ -30,6 +30,6 @@ If you find any issue just put it in the repository issue section, thank you  :D
 #### MIT
 
 ## Contact Me
-* Fcaebook : [@Abdelmoumen drici]https://www.facebook.com/moumen.seglawi
-* Instagram : [@Flyflytech]https://www.instagram.com/flyflytech/
-* Linkedin : [@Abdelmoumen Drici]https://www.linkedin.com/in/abdelmoumen-drici-633599157/
+* Fcaebook : https://www.facebook.com/moumen.seglawi
+* Instagram : https://www.instagram.com/flyflytech/
+* Linkedin : https://www.linkedin.com/in/abdelmoumen-drici-633599157/
