@@ -6,18 +6,18 @@ GUI tool to manage libvirt domains using python, libvirt API, PyQt5, Qtmodern
 
 ## Getting Started
 
-1- Download the repository files (project) from the download section or clone this project by typing in the bash the following command
-	git clone https://github.com/HouariZegai/PrayerTimes.git
-	Import it in Pycharm or any other Python IDE.
-2- install the dependencies :
-	libvirt API, PyQt5, Qtmodern
-3- and RUN IT :D
+1. Download the repository files (project) from the download section or clone this project by typing in the bash the following command :
+	* git clone https://github.com/flyflyinit/libvirt-GUI-using-python.git
+	* Import it in Pycharm or any other Python IDE.
+2. install the dependencies :
+	* libvirt API
+	* PyQt5
+	* Qtmodern
+3. and RUN IT :D
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [qtmodern] (https://github.com/gmarull/qtmodern) - PyQt/PySide Widgets Modern User Interface
 
 ## Contributing
 If you want to contribute to this project and make it better with new ideas, your pull requests are very welcomed. 
@@ -28,7 +28,7 @@ Abdelmoumen Drici  (flyflyinit)
 https://github.com/flyflyinit
 
 ## License
-MIT
+#### MIT
 
 ## Contact Me
 Fcaebook : https://www.facebook.com/moumen.seglawi
