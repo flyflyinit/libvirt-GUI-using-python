@@ -24,13 +24,12 @@ If you want to contribute to this project and make it better with new ideas, you
 If you find any issue just put it in the repository issue section, thank you  :D
 
 ## Authors
-Abdelmoumen Drici  (flyflyinit)
-https://github.com/flyflyinit
+* Abdelmoumen Drici  (flyflyinit) https://github.com/flyflyinit
 
 ## License
 #### MIT
 
 ## Contact Me
-Fcaebook : https://www.facebook.com/moumen.seglawi
-Instagram : https://www.instagram.com/flyflytech/
-Linkedin : https://www.linkedin.com/in/abdelmoumen-drici-633599157/
+* Fcaebook : [@Abdelmoumen drici]https://www.facebook.com/moumen.seglawi
+* Instagram : [@Flyflytech]https://www.instagram.com/flyflytech/
+* Linkedin : [@Abdelmoumen Drici]https://www.linkedin.com/in/abdelmoumen-drici-633599157/
