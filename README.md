@@ -13,6 +13,8 @@ GUI tool to manage libvirt domains using python, libvirt API, PyQt5, Qtmodern
 	* libvirt API
 	* PyQt5
 	* Qtmodern
+    * Virsh Command Line (dnf install libvirt-client)
+    * Spicy (dnf install spice-gtk-tools)
 3. and RUN IT :D
 
 ## Built With
