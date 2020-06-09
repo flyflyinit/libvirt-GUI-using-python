@@ -2,9 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="922d6ba6-8129-4680-b02e-16d214c9a6ea" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/PyLibvirt/usageplots.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/getInfo.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/cpu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/destroy.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/disk.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/io.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/ram.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/reboot.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/reset.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/restore.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/resume.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/save.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/shutdown.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/start.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/icons/suspend.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -31,6 +48,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/../virtualization-GUI-tool" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
@@ -46,7 +64,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.main (1)">
     <configuration name="getInfo" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="virtualization-GUI-tool" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -60,6 +78,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/getInfo.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="virtualization-GUI-tool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/PyLibvirt" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/PyLibvirt/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -133,6 +172,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main (1)" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.getInfo" />
@@ -152,6 +192,9 @@
       <updated>1582664914920</updated>
     </task>
     <servers />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.md" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
