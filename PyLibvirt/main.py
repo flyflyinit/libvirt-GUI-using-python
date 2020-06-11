@@ -10,6 +10,8 @@ from getInfo import GetInformationMain
 from getInfo import PreWindow
 import libvirt
 
+from usageplots import PlotsWindow, MemoryCanvas,MyMplCanvas
+import psutil
 
 uri='qemu:///system'
 host='localhost'
@@ -64,6 +66,7 @@ class Window(QMainWindow):
 
         self.ins = GetInformationMain()
         self.conn = self.ins.createConnection(host,uri)
+        self.memoryC = {}
         self.updateListVM()
         self.startUpdatingTimer()
         #self.ins.systemInformation(self.conn)
@@ -119,7 +122,7 @@ class Window(QMainWindow):
 
     def toolBarr2(self):
         tb2 = self.addToolBar("Statistics")
-        self.addToolBar(QtCore.Qt.RightToolBarArea, tb2)
+        self.addToolBar(QtCore.Qt.BottomToolBarArea, tb2)
 
         tb2.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
@@ -381,13 +384,21 @@ class Window(QMainWindow):
 
 
     def layouts(self):
+
         self.mainLayout=QVBoxLayout()
         self.topLayout=QHBoxLayout()
         self.bottomLayout=QHBoxLayout()
 
         self.table=QTableWidget()
         self.table.setRowCount(0)
-        self.table.setColumnCount(11)
+        self.table.setColumnCount(12)
+
+        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.table.setAutoFillBackground(True)
+
+        header = self.table.horizontalHeader()
+        header.setStretchLastSection(True)
+
         self.table.setHorizontalHeaderItem(0,QTableWidgetItem("ID"))
         self.table.setHorizontalHeaderItem(1,QTableWidgetItem("NAME"))
         self.table.setHorizontalHeaderItem(2,QTableWidgetItem("UUID"))
@@ -399,6 +410,7 @@ class Window(QMainWindow):
         self.table.setHorizontalHeaderItem(8,QTableWidgetItem("VNC"))
         self.table.setHorizontalHeaderItem(9,QTableWidgetItem("SPICE"))
         self.table.setHorizontalHeaderItem(10,QTableWidgetItem("GUI"))
+        self.table.setHorizontalHeaderItem(11,QTableWidgetItem("USAGE"))
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         #self.table.resizeColumnsToContents()
@@ -406,6 +418,7 @@ class Window(QMainWindow):
         self.table.setCurrentCell(-1,-1)
 
         self.topLayout.addWidget(self.table)
+        #self.topLayout.addLayout(self.gridSystem)
         self.setCentralWidget(self.table)
 
         #self.bottomLayout.addWidget(self.title)
@@ -469,6 +482,8 @@ class Window(QMainWindow):
         self.ins.virDomainList(self.conn)
         rows = self.ins.info_table
         for self.row in rows:
+            self.dom = self.conn.lookupByName(self.row[1])
+            self.domainname = self.dom.name()
             self.rowPosition = self.table.rowCount()
             self.table.insertRow(self.rowPosition)
             self.table.setItem(self.rowPosition, 0, QTableWidgetItem(str(self.row[0])))
@@ -482,12 +497,65 @@ class Window(QMainWindow):
             self.table.setItem(self.rowPosition, 8, QTableWidgetItem(str(self.row[8])))
             self.table.setItem(self.rowPosition, 9, QTableWidgetItem(str(self.row[9])))
 
+            self.table.setRowHeight(self.rowPosition,80)
+
             self.btn=QPushButton("Open")
             self.btn.clicked.connect(self.connectGUI)
             self.table.setCellWidget(self.rowPosition, 10,self.btn)
+            #self.usage=QPushButton("Show")
+            #self.usage.clicked.connect(self.ShowUsage)
+            #self.table.setCellWidget(self.rowPosition, 11,self.usage)
+            state = self.row[3]
+            #if state != 'SHUT DOWN' and state != 'SHUT OFF' and state!='PAUSED':
+            if state == 'RUNNING':
+                print(self.domainname)
+                print(self.memoryC.keys())
+                if self.domainname in self.memoryC.keys():
+                    self.memoryC[self.domainname].dom = self.dom
+                    self.table.setCellWidget(self.rowPosition, 11, self.memoryC[self.domainname])
+                    print("already exist"+str(self.domainname)+"   "+str(self.dom.name()))
+                else:
+                    self.memoryC[self.domainname] = MemoryCanvas(dom=self.dom, width=3, height=3.3, dpi=20)
+                    self.table.setCellWidget(self.rowPosition, 11, self.memoryC[self.domainname])
+            else:
+                pass
 
+    def ShowUsage(self):
+        global host
+        global uri
 
-
+        a = self.table.currentRow()
+        self.table.setCurrentCell(-1,-1)
+        if a==-1:
+            QMessageBox.warning(self,"warning","please select a VM")
+        else:
+            try:
+                row = rows[a]
+                domain = row[1]
+                state = row[3]
+                if state != 'SHUT DOWN' and state != 'SHUT OFF':
+                    self.plotswindow = PlotsWindow(domain,self.conn)
+                    self.pw = qtmodern.windows.ModernWindow(self.plotswindow)
+                    self.pw.show()
+                    '''
+                    vnc = str(row[8])
+                    spice = str(row[9])
+                    spiceport = str(spice.split('(')[0])
+                    vncport = str(vnc.split('(')[0])
+                    if spiceport!='-1':
+                        subprocess.run(f'spicy --uri={uri} -h {host} -p {spiceport}',shell=True)
+                    elif vncport!='-1':
+                        c = subprocess.run(f'virsh vncdisplay {domain}',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                        out=str(c.stdout.decode('utf-8'))
+                        # tiger vnc client
+                        subprocess.run(f'vncviewer {out}',shell=True)
+                    else:
+                        QMessageBox.warning(self, 'warning', f'domain {domain}, Failed to get VNC port, and SPICE port. Is this domain using VNC or SPICE ?')
+                    '''
+                else:
+                    QMessageBox.warning(self,'warning',f'domain {domain} is not running')
+            except Exception as e:
+                QMessageBox.critical(self, 'error', f'error occured \n{e}')
 
     def connectGUI(self):
         global host
@@ -608,8 +676,27 @@ class Window(QMainWindow):
         global cpuplt
         global cpuax1
         global cpuani
+
+        map = self.conn.getCPUMap()
+
+        print("CPUs: " + str(map[0]))
+        print("Available: " + str(map[1]))
+
+        #cpu_stats = self.dom.getCPUStats(False)
+        #print(cpu_stats)
+        '''
+        for (i, cpu) in enumerate(cpu_stats):
+            print('CPU ' + str(i) + ' Time: ' + str(cpu['cpu_time'] / 1000000000.))
+        '''
+
+        stats = self.dom.getCPUStats(0)
+        print("kernel: " + str(stats['kernel']))
+        print("idle:   " + str(stats['idle']))
+        print("user:   " + str(stats['user']))
+        print("iowait: " + str(stats['iowait']))
+
         cpus=[]
-        cpu_stats = self.dom.getCPUStats(False)
+        cpu_stats = self.dom.getCPUStats(True)
         for (i, cpu) in enumerate(cpu_stats):
             #print('CPU ' + str(i) + ' Time: ' + str(cpu['cpu_time'] / 1000000000.))
             cpus.append(cpu['cpu_time'])
